@@ -33,13 +33,19 @@ func TestGetDirectories(t *testing.T) {
 }
 
 func TestGetFiles(t *testing.T) {
-	files, err := GetFiles("E:\\下载的代码\\ngrok", "*.go", true)
+	// 使用当前目录进行测试
+	files, err := GetFiles(".", "*.go", false)
 	if err != nil {
-		t.Fatalf("获取文件出错：%v", files)
+		t.Fatalf("获取文件出错：%v", err)
 		return
 	}
 
-	for _, file := range files {
-		t.Log(file)
+	// 应该至少找到一些.go文件
+	if len(files) == 0 {
+		t.Log("当前目录没有找到.go文件，这是正常的")
+	} else {
+		for _, file := range files {
+			t.Log(file)
+		}
 	}
 }

@@ -1,6 +1,8 @@
 package path
 
 import (
+	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -62,14 +64,22 @@ func TestGetFileNameWithoutExtension(t *testing.T) {
 }
 func TestGetFullPath(t *testing.T) {
 	path := "./c.txt"
-	fileName := "E:/GoProject/ngo/io/path/c.txt"
 	result, err := GetFullPath(path)
 	if err != nil {
 		t.Error(err)
 		return
 	}
-	if !Equals(result, fileName) {
-		t.Errorf("%s is not expected\n", result)
+	
+	// 检查结果是否以正确的文件名结尾，而不是硬编码完整路径
+	expectedSuffix := "c.txt"
+	if !strings.HasSuffix(result, expectedSuffix) {
+		t.Errorf("Expected path to end with %s, but got %s", expectedSuffix, result)
+		return
+	}
+	
+	// 检查路径是否为绝对路径
+	if !filepath.IsAbs(result) {
+		t.Errorf("Expected absolute path, but got %s", result)
 		return
 	}
 }

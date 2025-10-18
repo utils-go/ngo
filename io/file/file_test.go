@@ -65,6 +65,10 @@ func TestCopy(t *testing.T) {
 	srcPath = filepath.Join(dir, srcPath)
 	dstPath := "./test1.txt"
 	dstPath = filepath.Join(dir, dstPath)
+	
+	// 清理目标文件
+	os.Remove(dstPath)
+	
 	err := Copy(srcPath, dstPath)
 	if err != nil {
 		t.Errorf("%v", err)
@@ -106,6 +110,12 @@ func TestMove(t *testing.T) {
 	srcPath = filepath.Join(dir, srcPath)
 	dstPath := "./test_move.txt"
 	dstPath = filepath.Join(dir, dstPath)
+	
+	// 清理目标文件
+	os.Remove(dstPath)
+	// 确保源文件存在
+	WriteAllText(srcPath, "test content for move")
+	
 	err := Move(srcPath, dstPath)
 	if err != nil {
 		t.Errorf("%v", err)
@@ -132,7 +142,11 @@ func TestMoveWithOverwrite(t *testing.T) {
 	srcPath = filepath.Join(dir, srcPath)
 	dstPath := "./test_move.txt"
 	dstPath = filepath.Join(dir, dstPath)
-	err := Move(srcPath, dstPath)
+	
+	// 确保源文件存在
+	WriteAllText(srcPath, "test content for move with overwrite")
+	
+	err := MoveWithOverwrite(srcPath, dstPath)
 	if err != nil {
 		t.Errorf("%v", err)
 		return

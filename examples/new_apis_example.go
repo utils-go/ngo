@@ -11,7 +11,7 @@ import (
 	"github.com/utils-go/ngo/text"
 )
 
-func main() {
+func newApisExample() {
 	fmt.Println("=== NGo New APIs Examples ===\n")
 
 	// 1. StringBuilder Examples

@@ -375,6 +375,91 @@ func main() {
 }
 ```
 
+encoding: `System.Text.Encoding` for character encoding conversion
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/text"
+)
+
+func main() {
+	// International text with various scripts
+	text := "Hello, 世界! 🌍 Привет мир!"
+	
+	// UTF-8 encoding (Go default)
+	utf8Bytes := text.UTF8.GetBytes(text)
+	fmt.Printf("UTF-8: %d bytes\n", len(utf8Bytes))
+	
+	// UTF-16 encoding
+	utf16Bytes := text.Unicode.GetBytes(text)
+	fmt.Printf("UTF-16: %d bytes\n", len(utf16Bytes))
+	
+	// ASCII encoding (replaces non-ASCII with '?')
+	asciiBytes := text.ASCII.GetBytes("Hello, World!")
+	fmt.Printf("ASCII: %d bytes\n", len(asciiBytes))
+	
+	// Encoding conversion
+	converted, _ := text.Convert(text.UTF8, text.Unicode, utf8Bytes)
+	fmt.Printf("Converted UTF-8 to UTF-16: %d bytes\n", len(converted))
+	
+	// Get encoding by name or code page
+	encoding, _ := text.GetEncoding("utf-8")
+	fmt.Printf("Encoding: %s (CP: %d)\n", 
+		encoding.EncodingName(), encoding.CodePage())
+}
+```
+
+reflection: `System.Reflection` for runtime type inspection and manipulation
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/reflection"
+)
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+func (p *Person) GetInfo() string {
+	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
+}
+
+func main() {
+	person := &Person{Name: "John", Age: 30}
+	
+	// Get type information
+	personType := reflection.GetType(person)
+	fmt.Printf("Type: %s\n", personType.Name())
+	fmt.Printf("Is pointer: %t\n", personType.IsPointer())
+	
+	// Get fields
+	fields := personType.GetFields()
+	for _, field := range fields {
+		value, _ := field.GetValue(person)
+		fmt.Printf("Field %s: %v\n", field.Name, value)
+	}
+	
+	// Modify field
+	nameField := personType.GetField("Name")
+	nameField.SetValue(person, "Jane")
+	fmt.Printf("Changed name to: %s\n", person.Name)
+	
+	// Invoke method
+	method := personType.GetMethod("GetInfo")
+	results, _ := method.Invoke(person)
+	fmt.Printf("Method result: %s\n", results[0])
+	
+	// Create new instance
+	newInstance, _ := personType.CreateInstance()
+	fmt.Printf("Created: %T\n", newInstance)
+}
+```
+
 
 # Finish:
 - File
@@ -393,6 +478,8 @@ func main() {
 - Linq (Basic Methods)
 - Environment
 - Diagnostics.Stopwatch
+- Text.Encoding
+- Reflection
 
 # Planned (High Priority):
 ## System.String

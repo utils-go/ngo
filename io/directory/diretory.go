@@ -49,7 +49,10 @@ func GetFiles(path string, searchPattern string, recursion bool) ([]string, erro
 		}
 	} else {
 		err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-			if d.IsDir() {
+			if err != nil {
+				return err
+			}
+			if d == nil || d.IsDir() {
 				return nil
 			}
 
