@@ -8,20 +8,21 @@ import (
 	"time"
 )
 
-// tcp长连接
+// ReconnectTcp TCP长连接实现，支持自动重连
 type ReconnectTcp struct {
-	DstAddr string
-	// 当有内容时，进行断线重连
-	reconnectChan chan struct{}
-	//通知关闭，结束协程，不进行断线重连
-	closeChan chan struct{}
-	// 将返回的内容放入这里
-	RecvBuffer *concurrent.ConcurrentListT[byte]
-	// tcp连接
-	conn net.Conn
-	mu   sync.Mutex
+	DstAddr       string                         // 目标地址
+	reconnectChan chan struct{}                  // 重连信号通道
+	closeChan     chan struct{}                  // 关闭信号通道
+	RecvBuffer    *concurrent.ConcurrentListT[byte] // 接收缓冲区
+	conn          net.Conn                       // TCP连接
+	mu            sync.Mutex                     // 互斥锁，保证并发安全
 }
 
+// SendMsg 发送消息到目标地址
+// 参数:
+//   data: 要发送的数据
+// 返回值:
+//   error: 发送过程中的错误
 func (t *ReconnectTcp) SendMsg(data []byte) error {
 	if t.conn == nil {
 		t.reconnect()
@@ -33,7 +34,7 @@ func (t *ReconnectTcp) SendMsg(data []byte) error {
 	t.mu.Unlock()
 
 	if err != nil {
-		//出错，重连
+		// 出错，重连
 		t.reconnect()
 		time.Sleep(time.Millisecond * 100)
 		return err
@@ -41,7 +42,12 @@ func (t *ReconnectTcp) SendMsg(data []byte) error {
 	return nil
 }
 
-// new reconnect tcp connection
+// NewRTcpConnection 创建一个新的TCP长连接
+// 参数:
+//   addr: 目标地址，格式为"host:port"
+// 返回值:
+//   *ReconnectTcp: 新创建的TCP长连接
+//   error: 创建过程中的错误
 func NewRTcpConnection(addr string) (*ReconnectTcp, error) {
 	if _, err := net.ResolveTCPAddr("tcp", addr); err != nil {
 		return nil, err
@@ -56,6 +62,8 @@ func NewRTcpConnection(addr string) (*ReconnectTcp, error) {
 	go t.handleRead()
 	return t, nil
 }
+
+// connect 建立TCP连接
 func (t *ReconnectTcp) connect() {
 	if t.conn != nil {
 		t.conn.Close()
@@ -69,7 +77,7 @@ func (t *ReconnectTcp) connect() {
 	fmt.Printf("connect to %s success\n", con.RemoteAddr())
 }
 
-// 处理重连
+// handleReconnect 处理重连逻辑
 func (t *ReconnectTcp) handleReconnect() {
 	for {
 		select {
@@ -82,7 +90,7 @@ func (t *ReconnectTcp) handleReconnect() {
 	}
 }
 
-// add signal without block
+// reconnect 发送重连信号（非阻塞）
 func (t *ReconnectTcp) reconnect() {
 	select {
 	case t.reconnectChan <- struct{}{}:
@@ -90,11 +98,11 @@ func (t *ReconnectTcp) reconnect() {
 	}
 }
 
-// 连接
+// handleRead 处理读取逻辑
 func (t *ReconnectTcp) handleRead() {
 	buf := make([]byte, 1024)
 	for {
-		//处理关闭
+		// 处理关闭
 		select {
 		case <-t.closeChan:
 			fmt.Printf("remote connection:%s has been closed,exit handleRead goroutine\n", t.DstAddr)
@@ -116,7 +124,7 @@ func (t *ReconnectTcp) handleRead() {
 	}
 }
 
-// 关闭
+// Close 关闭TCP连接
 func (t *ReconnectTcp) Close() {
 	close(t.closeChan)
 }

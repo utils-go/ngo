@@ -12,19 +12,21 @@ import (
 长连接：将连接存储起来，不主动关闭
 */
 
+// ReconnectUdp UDP长连接实现，支持自动重连
 type ReconnectUdp struct {
-	DstAddr *net.UDPAddr
-	//当连接或者写入报错时，则重新初始化conn
-	reconnectChan chan struct{}
-	//关闭通知
-	closeChan chan struct{}
-	//接收到的字节
-	RecvBuffer *concurrent.ConcurrentListT[[]byte]
-	//tcp连接
-	conn *net.UDPConn
-	mu   sync.Mutex
+	DstAddr       *net.UDPAddr                  // 目标地址
+	reconnectChan chan struct{}                 // 重连信号通道
+	closeChan     chan struct{}                 // 关闭信号通道
+	RecvBuffer    *concurrent.ConcurrentListT[[]byte] // 接收缓冲区
+	conn          *net.UDPConn                  // UDP连接
+	mu            sync.Mutex                    // 互斥锁，保证并发安全
 }
 
+// SendMsg 发送消息到目标地址
+// 参数:
+//   data: 要发送的数据
+// 返回值:
+//   error: 发送过程中的错误
 func (u *ReconnectUdp) SendMsg(data []byte) error {
 	if u.conn == nil {
 		u.reconnect()
@@ -43,6 +45,13 @@ func (u *ReconnectUdp) SendMsg(data []byte) error {
 	}
 	return nil
 }
+
+// NewRUdpConnection 创建一个新的UDP长连接
+// 参数:
+//   serverAddr: 目标地址，格式为"host:port"
+// 返回值:
+//   *ReconnectUdp: 新创建的UDP长连接
+//   error: 创建过程中的错误
 func NewRUdpConnection(serverAddr string) (*ReconnectUdp, error) {
 	udpAddr, err := net.ResolveUDPAddr("udp", serverAddr)
 	if err != nil {
@@ -58,6 +67,8 @@ func NewRUdpConnection(serverAddr string) (*ReconnectUdp, error) {
 	go u.handRead()
 	return u, nil
 }
+
+// connect 建立UDP连接
 func (u *ReconnectUdp) connect() {
 	if u.conn != nil {
 		u.conn.Close()
@@ -71,6 +82,8 @@ func (u *ReconnectUdp) connect() {
 	fmt.Printf("listen to [%s] success\n", con.LocalAddr())
 	u.conn = con
 }
+
+// handleReconnect 处理重连逻辑
 func (u *ReconnectUdp) handleReconnect() {
 	for {
 		select {
@@ -83,7 +96,7 @@ func (u *ReconnectUdp) handleReconnect() {
 	}
 }
 
-// add signal without block
+// reconnect 发送重连信号（非阻塞）
 func (t *ReconnectUdp) reconnect() {
 	select {
 	case t.reconnectChan <- struct{}{}:
@@ -91,7 +104,7 @@ func (t *ReconnectUdp) reconnect() {
 	}
 }
 
-// 处理读取数据
+// handRead 处理读取数据
 func (u *ReconnectUdp) handRead() {
 	buffer := make([]byte, 1024)
 	for {
@@ -120,6 +133,8 @@ func (u *ReconnectUdp) handRead() {
 		}
 	}
 }
+
+// Close 关闭UDP连接
 func (u *ReconnectUdp) Close() {
 	close(u.closeChan)
 }

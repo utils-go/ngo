@@ -8,7 +8,12 @@ import (
 	"time"
 )
 
-// ToInt32 converts the specified value to a 32-bit signed integer
+// ToInt32 将指定的值转换为32位有符号整数
+// 参数:
+//   value: 要转换的值
+// 返回值:
+//   int32: 转换后的32位有符号整数
+//   error: 转换过程中的错误
 func ToInt32(value interface{}) (int32, error) {
 	switch v := value.(type) {
 	case int32:
@@ -34,7 +39,12 @@ func ToInt32(value interface{}) (int32, error) {
 	}
 }
 
-// ToBoolean converts the specified value to an equivalent Boolean value
+// ToBoolean 将指定的值转换为等效的布尔值
+// 参数:
+//   value: 要转换的值
+// 返回值:
+//   bool: 转换后的布尔值
+//   error: 转换过程中的错误
 func ToBoolean(value interface{}) (bool, error) {
 	switch v := value.(type) {
 	case bool:
@@ -64,7 +74,11 @@ func ToBoolean(value interface{}) (bool, error) {
 	}
 }
 
-// ToString converts the specified value to its equivalent string representation
+// ToString 将指定的值转换为其等效的字符串表示形式
+// 参数:
+//   value: 要转换的值
+// 返回值:
+//   string: 转换后的字符串表示形式
 func ToString(value interface{}) string {
 	if value == nil {
 		return ""
@@ -95,29 +109,59 @@ func ToString(value interface{}) string {
 	}
 }
 
-// ToBase64String converts an array of 8-bit unsigned integers to base-64 string
+// ToBase64String 将8位无符号整数数组转换为base-64字符串
+// 参数:
+//   data: 要转换的字节数组
+// 返回值:
+//   string: 转换后的base-64字符串
 func ToBase64String(data []byte) string {
 	return base64.StdEncoding.EncodeToString(data)
 }
 
-// FromBase64String converts base-64 string to byte array
+// FromBase64String 将base-64字符串转换为字节数组
+// 参数:
+//   s: 要转换的base-64字符串
+// 返回值:
+//   []byte: 转换后的字节数组
+//   error: 转换过程中的错误
 func FromBase64String(s string) ([]byte, error) {
 	return base64.StdEncoding.DecodeString(s)
 }
 
-// Legacy methods for backward compatibility
+// ConvertToIntFromString 将字符串转换为整数（向后兼容）
+// 参数:
+//   s: 要转换的字符串
+// 返回值:
+//   int: 转换后的整数
+//   error: 转换过程中的错误
 func ConvertToIntFromString(s string) (int, error) {
 	return strconv.Atoi(s)
 }
 
+// ConvertToStringFromInt 将整数转换为字符串（向后兼容）
+// 参数:
+//   i: 要转换的整数
+// 返回值:
+//   string: 转换后的字符串
 func ConvertToStringFromInt(i int) string {
 	return strconv.Itoa(i)
 }
 
+// ConvertToBoolFromString 将字符串转换为布尔值（向后兼容）
+// 参数:
+//   s: 要转换的字符串
+// 返回值:
+//   bool: 转换后的布尔值
+//   error: 转换过程中的错误
 func ConvertToBoolFromString(s string) (bool, error) {
 	return ToBoolean(s)
 }
 
+// ConvertStringFromBool 将布尔值转换为字符串（向后兼容）
+// 参数:
+//   b: 要转换的布尔值
+// 返回值:
+//   string: 转换后的字符串
 func ConvertStringFromBool(b bool) string {
 	return ToString(b)
 }

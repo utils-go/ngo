@@ -8,18 +8,24 @@ import (
 	"sync"
 )
 
+// ConcurrentListT 泛型版本的并发安全列表实现
 type ConcurrentListT[T any] struct {
-	data          []T
-	mux           sync.Mutex
-	chItemChanged chan changeType
+	data          []T             // 存储数据的切片
+	mux           sync.Mutex      // 互斥锁，保证并发安全
+	chItemChanged chan changeType // 变更通知通道
 }
 
+// notifyItemChanged 通知列表发生了变更
+// 参数:
+//   t: 变更类型
 func (c *ConcurrentListT[T]) notifyItemChanged(t changeType) {
 	select {
 	case c.chItemChanged <- t:
 	default:
 	}
 }
+
+// clearNotifyMsg 清空通知通道中的所有消息
 func (c *ConcurrentListT[T]) clearNotifyMsg() {
 	for {
 		select {
@@ -33,6 +39,11 @@ func (c *ConcurrentListT[T]) clearNotifyMsg() {
 	}
 }
 
+// NewListT 创建一个新的泛型并发安全列表
+// 参数:
+//   T: 列表元素的类型
+// 返回值:
+//   *ConcurrentListT[T]: 新创建的泛型并发安全列表
 func NewListT[T any]() *ConcurrentListT[T] {
 	return &ConcurrentListT[T]{
 		data:          make([]T, 0),
@@ -40,6 +51,9 @@ func NewListT[T any]() *ConcurrentListT[T] {
 	}
 }
 
+// Add 向列表中添加一个元素
+// 参数:
+//   v: 要添加的元素
 func (c *ConcurrentListT[T]) Add(v T) {
 	c.mux.Lock()
 	c.data = append(c.data, v)
@@ -48,6 +62,9 @@ func (c *ConcurrentListT[T]) Add(v T) {
 	c.notifyItemChanged(add)
 }
 
+// AddRange 向列表中添加多个元素
+// 参数:
+//   v: 要添加的元素切片
 func (c *ConcurrentListT[T]) AddRange(v []T) {
 	c.mux.Lock()
 	c.data = append(c.data, v...)
@@ -56,6 +73,7 @@ func (c *ConcurrentListT[T]) AddRange(v []T) {
 	c.notifyItemChanged(add)
 }
 
+// Clear 清空列表
 func (c *ConcurrentListT[T]) Clear() {
 	c.mux.Lock()
 	c.data = make([]T, 0)
@@ -65,6 +83,11 @@ func (c *ConcurrentListT[T]) Clear() {
 	c.notifyItemChanged(remove)
 }
 
+// Remove 从列表中移除指定元素
+// 参数:
+//   v: 要移除的元素
+// 返回值:
+//   bool: 如果元素被成功移除，返回true；否则返回false
 func (c *ConcurrentListT[T]) Remove(v T) bool {
 	c.mux.Lock()
 	result := c.removeWithoutLock(v)
@@ -73,6 +96,12 @@ func (c *ConcurrentListT[T]) Remove(v T) bool {
 	c.notifyItemChanged(remove)
 	return result
 }
+
+// removeWithoutLock 在无锁情况下从列表中移除指定元素
+// 参数:
+//   v: 要移除的元素
+// 返回值:
+//   bool: 如果元素被成功移除，返回true；否则返回false
 func (c *ConcurrentListT[T]) removeWithoutLock(v T) bool {
 	newslice := make([]T, 0)
 	isexist := false
@@ -93,6 +122,10 @@ func (c *ConcurrentListT[T]) removeWithoutLock(v T) bool {
 	return false
 }
 
+// RemoveRange 从列表中移除指定范围的元素
+// 参数:
+//   index: 起始索引
+//   count: 要移除的元素数量
 func (c *ConcurrentListT[T]) RemoveRange(index, count int) {
 	c.mux.Lock()
 	c.removeRangeWithoutLock(index, count)
@@ -100,6 +133,11 @@ func (c *ConcurrentListT[T]) RemoveRange(index, count int) {
 
 	c.notifyItemChanged(remove)
 }
+
+// removeRangeWithoutLock 在无锁情况下从列表中移除指定范围的元素
+// 参数:
+//   index: 起始索引
+//   count: 要移除的元素数量
 func (c *ConcurrentListT[T]) removeRangeWithoutLock(index, count int) {
 	newslice := make([]T, 0)
 	newslice = append(newslice, c.data[0:index]...)
@@ -108,13 +146,24 @@ func (c *ConcurrentListT[T]) removeRangeWithoutLock(index, count int) {
 	c.data = newslice
 }
 
-// just get ,not remove
+// Get 获取列表中指定索引的元素（不会移除）
+// 参数:
+//   index: 元素索引
+// 返回值:
+//   T: 索引对应的元素
+//   error: 如果索引越界，返回错误
 func (c *ConcurrentListT[T]) Get(index int) (T, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	return c.getWithoutLock(index)
 }
 
+// getWithoutLock 在无锁情况下获取列表中指定索引的元素
+// 参数:
+//   index: 元素索引
+// 返回值:
+//   T: 索引对应的元素
+//   error: 如果索引越界，返回错误
 func (c *ConcurrentListT[T]) getWithoutLock(index int) (T, error) {
 	var defaultT T
 	if len(c.data) <= index {
@@ -123,14 +172,21 @@ func (c *ConcurrentListT[T]) getWithoutLock(index int) (T, error) {
 	return c.data[index], nil
 }
 
-// get all and not remove
+// GetAll 获取列表中的所有元素（不会移除）
+// 返回值:
+//   []T: 列表中的所有元素
 func (c *ConcurrentListT[T]) GetAll() []T {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 	return c.data
 }
 
-// get one item and remove
+// Take 获取并移除列表中指定索引的元素
+// 参数:
+//   index: 元素索引
+// 返回值:
+//   T: 索引对应的元素
+//   error: 如果索引越界或移除失败，返回错误
 func (c *ConcurrentListT[T]) Take(index int) (T, error) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
@@ -144,6 +200,10 @@ func (c *ConcurrentListT[T]) Take(index int) (T, error) {
 	}
 	return d, nil
 }
+
+// TakeAll 获取并移除列表中的所有元素
+// 返回值:
+//   []T: 列表中的所有元素
 func (c *ConcurrentListT[T]) TakeAll() []T {
 	c.mux.Lock()
 	defer c.mux.Unlock()
@@ -153,7 +213,12 @@ func (c *ConcurrentListT[T]) TakeAll() []T {
 	return r
 }
 
-// when no item add or no cancel,it will block
+// TakeAllBlock 阻塞直到列表中有元素添加或上下文被取消，然后获取并移除所有元素
+// 参数:
+//   ctx: 上下文，用于取消阻塞
+// 返回值:
+//   []T: 列表中的所有元素
+//   bool: 如果成功获取元素，返回true；否则返回false
 func (c *ConcurrentListT[T]) TakeAllBlock(ctx context.Context) ([]T, bool) {
 	for {
 		select {
