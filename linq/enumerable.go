@@ -395,3 +395,121 @@ func (e *Enumerable[T]) ForEach(action func(T)) {
 		action(item)
 	}
 }
+
+// Sum calculates the sum of the elements in the sequence
+func Sum(e *Enumerable[int]) int {
+	sum := 0
+	for _, item := range e.items {
+		sum += item
+	}
+	return sum
+}
+
+// Average calculates the average of the elements in the sequence
+func Average(e *Enumerable[float64]) float64 {
+	if len(e.items) == 0 {
+		return 0
+	}
+	
+	sum := 0.0
+	for _, item := range e.items {
+		sum += item
+	}
+	
+	return sum / float64(len(e.items))
+}
+
+// Min returns the minimum value in the sequence
+func Min(e *Enumerable[int]) (int, bool) {
+	if len(e.items) == 0 {
+		return 0, false
+	}
+	
+	min := e.items[0]
+	for _, item := range e.items[1:] {
+		if item < min {
+			min = item
+		}
+	}
+	
+	return min, true
+}
+
+// Max returns the maximum value in the sequence
+func Max(e *Enumerable[int]) (int, bool) {
+	if len(e.items) == 0 {
+		return 0, false
+	}
+	
+	max := e.items[0]
+	for _, item := range e.items[1:] {
+		if item > max {
+			max = item
+		}
+	}
+	
+	return max, true
+}
+
+// Zip applies a specified function to the corresponding elements of two sequences, producing a sequence of the results
+func Zip[T, U, R any](first *Enumerable[T], second *Enumerable[U], resultSelector func(T, U) R) *Enumerable[R] {
+	length := len(first.items)
+	if len(second.items) < length {
+		length = len(second.items)
+	}
+	
+	result := make([]R, length)
+	for i := 0; i < length; i++ {
+		result[i] = resultSelector(first.items[i], second.items[i])
+	}
+	
+	return &Enumerable[R]{items: result}
+}
+
+// DefaultIfEmpty returns the elements of the specified sequence or the type's default value in a singleton sequence if the sequence is empty
+func (e *Enumerable[T]) DefaultIfEmpty(defaultValue T) *Enumerable[T] {
+	if len(e.items) > 0 {
+		return e
+	}
+	
+	return &Enumerable[T]{items: []T{defaultValue}}
+}
+
+// ElementAt returns the element at the specified index in the sequence
+func (e *Enumerable[T]) ElementAt(index int) (T, bool) {
+	if index < 0 || index >= len(e.items) {
+		var zero T
+		return zero, false
+	}
+	
+	return e.items[index], true
+}
+
+// ElementAtOrDefault returns the element at the specified index in the sequence, or a default value if the index is out of range
+func (e *Enumerable[T]) ElementAtOrDefault(index int, defaultValue T) T {
+	if index < 0 || index >= len(e.items) {
+		return defaultValue
+	}
+	
+	return e.items[index]
+}
+
+// Cast converts the elements of an Enumerable to the specified type
+func Cast[T, R any](e *Enumerable[T], cast func(T) R) *Enumerable[R] {
+	result := make([]R, len(e.items))
+	for i, item := range e.items {
+		result[i] = cast(item)
+	}
+	return &Enumerable[R]{items: result}
+}
+
+// OfType filters the elements of an Enumerable based on a specified type
+func OfType[T, R any](e *Enumerable[T], isType func(T) bool, cast func(T) R) *Enumerable[R] {
+	var result []R
+	for _, item := range e.items {
+		if isType(item) {
+			result = append(result, cast(item))
+		}
+	}
+	return &Enumerable[R]{items: result}
+}

@@ -5,7 +5,7 @@ import (
 	"github.com/utils-go/ngo/collections/generic"
 	"github.com/utils-go/ngo/converter"
 	"github.com/utils-go/ngo/math"
-	"github.com/utils-go/ngo/strings"
+	"github.com/utils-go/ngo/stringUtils"
 )
 
 func main() {
@@ -13,20 +13,20 @@ func main() {
 
 	// System.String examples
 	fmt.Println("1. String Operations:")
-	str := strings.NewString("  Hello, World!  ")
-	fmt.Printf("Original: '%s'\n", str.Value())
-	fmt.Printf("Trimmed: '%s'\n", str.Trim().Value())
-	fmt.Printf("Upper: '%s'\n", str.ToUpper().Value())
-	fmt.Printf("Contains 'World': %t\n", str.Contains("World"))
-	fmt.Printf("Starts with 'Hello': %t\n", str.StartsWith("  Hello"))
+	str := "  Hello, World!  "
+	fmt.Printf("Original: '%s'\n", str)
+	fmt.Printf("Trimmed: '%s'\n", stringUtils.Trim(str))
+	fmt.Printf("Upper: '%s'\n", stringUtils.ToUpper(str))
+	fmt.Printf("Contains 'World': %t\n", stringUtils.Contains(str, "World"))
+	fmt.Printf("Starts with 'Hello': %t\n", stringUtils.StartsWith(str, "  Hello"))
 	
 	// String formatting
-	formatted := strings.Format("Hello {0}, you are {1} years old!", "John", 25)
+	formatted := stringUtils.Format("Hello {0}, you are {1} years old!", "John", 25)
 	fmt.Printf("Formatted: %s\n", formatted)
 	
 	// String splitting
-	csv := strings.NewString("apple,banana,cherry")
-	parts := csv.Split(",")
+	csv := "apple,banana,cherry"
+	parts := stringUtils.Split(csv, ",")
 	fmt.Printf("Split result: %v\n", parts)
 	fmt.Println()
 

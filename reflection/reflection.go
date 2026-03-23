@@ -545,3 +545,26 @@ func (t *Type) GetInterfaces() []*Type {
 	
 	return interfaces
 }
+
+// Assembly 表示程序集信息
+type Assembly struct {
+	// 简化实现
+}
+
+// GetExecutingAssembly 获取当前执行的程序集
+func GetExecutingAssembly() *Assembly {
+	return &Assembly{}
+}
+
+// Activator 用于创建类型实例
+type Activator struct{}
+
+// CreateInstance 创建指定类型的实例
+func (a *Activator) CreateInstance(t *Type, args ...interface{}) (interface{}, error) {
+	return t.CreateInstance(args...)
+}
+
+// NewActivator 创建一个新的 Activator
+func NewActivator() *Activator {
+	return &Activator{}
+}
