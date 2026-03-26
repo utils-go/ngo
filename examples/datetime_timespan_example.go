@@ -6,7 +6,7 @@ import (
 	"github.com/utils-go/ngo/timespan"
 )
 
-func main() {
+func main1() {
 	fmt.Println("=== NGo DateTime and TimeSpan Examples ===\n")
 
 	// TimeSpan examples

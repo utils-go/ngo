@@ -42,7 +42,7 @@ func (c *Company) GetEmployeeCount() int {
 	return len(c.Employees)
 }
 
-func main() {
+func main2() {
 	fmt.Println("=== NGo Text.Encoding and Reflection Examples ===\n")
 
 	// 1. Text Encoding Examples
