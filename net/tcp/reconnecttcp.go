@@ -24,17 +24,20 @@ type ReconnectTcp struct {
 // 返回值:
 //   error: 发送过程中的错误
 func (t *ReconnectTcp) SendMsg(data []byte) error {
-	if t.conn == nil {
+	t.mu.Lock()
+	conn := t.conn
+	t.mu.Unlock()
+
+	if conn == nil {
 		t.reconnect()
 		return fmt.Errorf("%s not connect yet", t.DstAddr)
 	}
 
 	t.mu.Lock()
-	_, err := t.conn.Write(data)
+	_, err := conn.Write(data)
 	t.mu.Unlock()
 
 	if err != nil {
-		// 出错，重连
 		t.reconnect()
 		time.Sleep(time.Millisecond * 100)
 		return err
@@ -65,15 +68,26 @@ func NewRTcpConnection(addr string) (*ReconnectTcp, error) {
 
 // connect 建立TCP连接
 func (t *ReconnectTcp) connect() {
-	if t.conn != nil {
-		t.conn.Close()
+	t.mu.Lock()
+	oldConn := t.conn
+	t.mu.Unlock()
+	
+	if oldConn != nil {
+		oldConn.Close()
 	}
-	con, err := net.DialTimeout("tcp", t.DstAddr, time.Second*500)
+	
+	con, err := net.DialTimeout("tcp", t.DstAddr, time.Second*30)
 	if err != nil {
+		t.mu.Lock()
 		t.conn = nil
+		t.mu.Unlock()
 		return
 	}
+	
+	t.mu.Lock()
 	t.conn = con
+	t.mu.Unlock()
+	
 	fmt.Printf("connect to %s success\n", con.RemoteAddr())
 }
 

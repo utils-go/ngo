@@ -66,18 +66,19 @@ package main
 
 import (
 	"fmt"
-	"github.com/utils-go/ngo/strings"
+	"github.com/utils-go/ngo/stringUtils"
 )
 
 func main() {
-	str := strings.NewString("  Hello, World!  ")
-	fmt.Println("Original:", str.Value())
-	fmt.Println("Trimmed:", str.Trim().Value())
-	fmt.Println("Upper:", str.ToUpper().Value())
-	fmt.Println("Contains 'World':", str.Contains("World"))
+	// String utility functions
+	s := "  Hello, World!  "
+	fmt.Println("Original:", s)
+	fmt.Println("Trimmed:", stringUtils.Trim(s))
+	fmt.Println("Upper:", stringUtils.ToUpper(s))
+	fmt.Println("Contains 'World':", stringUtils.Contains(s, "World"))
 	
 	// String formatting like .NET
-	formatted := strings.Format("Hello {0}, you are {1}!", "John", 25)
+	formatted := stringUtils.Format("Hello {0}, you are {1}!", "John", 25)
 	fmt.Println("Formatted:", formatted)
 }
 ```

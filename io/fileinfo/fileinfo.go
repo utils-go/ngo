@@ -114,7 +114,11 @@ func newFileInfo(path string) *FileInfo {
 	if err == nil {
 		info.Exists = true
 		info.Name = fileInfo.Name()
-		info.FullName, _ = filepath.Abs(path)
+		if fullName, absErr := filepath.Abs(path); absErr == nil {
+			info.FullName = fullName
+		} else {
+			info.FullName = path
+		}
 		info.DirectoryName = filepath.Dir(path)
 		info.Extension = filepath.Ext(path)
 		info.Length = fileInfo.Size()
@@ -124,7 +128,11 @@ func newFileInfo(path string) *FileInfo {
 	} else {
 		info.Exists = false
 		info.Name = filepath.Base(path)
-		info.FullName, _ = filepath.Abs(path)
+		if fullName, absErr := filepath.Abs(path); absErr == nil {
+			info.FullName = fullName
+		} else {
+			info.FullName = path
+		}
 		info.DirectoryName = filepath.Dir(path)
 		info.Extension = filepath.Ext(path)
 	}
@@ -184,13 +192,13 @@ func CreateText(path string) (*bufio.Writer, error) {
 //	path: 文件路径
 //	mode: 打开模式
 //	access: 访问权限
-//	share: 共享级别
+//	share: 共享级别（注意：Go 文件系统不支持文件共享级别，此参数保留用于 API 兼容性）
 //
 // 返回值:
 //
 //	*FileStream: 文件流
 //	error: 错误信息
-func Open(path string, mode FileMode, access FileAccess, share FileShare) (*FileStream, error) {
+func Open(path string, mode FileMode, access FileAccess, _ FileShare) (*FileStream, error) {
 	var osFlag int
 	var osPerm os.FileMode
 

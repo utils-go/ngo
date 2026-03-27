@@ -8,7 +8,7 @@ import (
 // List represents a strongly typed list of objects that can be accessed by index
 // Provides methods to search, sort, and manipulate lists
 // Reference: https://learn.microsoft.com/en-us/dotnet/api/system.collections.generic.list-1?view=netframework-4.7.2
-type List[T any] struct {
+type List[T comparable] struct {
 	items    []T
 	capacity int
 }
@@ -23,7 +23,7 @@ type Action[T any] func(T)
 type Comparison[T any] func(T, T) int
 
 // NewList creates a new instance of the List class that is empty and has the default initial capacity
-func NewList[T any]() *List[T] {
+func NewList[T comparable]() *List[T] {
 	return &List[T]{
 		items:    make([]T, 0),
 		capacity: 0,
@@ -31,7 +31,7 @@ func NewList[T any]() *List[T] {
 }
 
 // NewListWithCapacity creates a new instance of the List class that is empty and has the specified initial capacity
-func NewListWithCapacity[T any](capacity int) *List[T] {
+func NewListWithCapacity[T comparable](capacity int) *List[T] {
 	return &List[T]{
 		items:    make([]T, 0, capacity),
 		capacity: capacity,
@@ -39,7 +39,7 @@ func NewListWithCapacity[T any](capacity int) *List[T] {
 }
 
 // NewListFromSlice creates a new instance of the List class that contains elements copied from the specified slice
-func NewListFromSlice[T any](items []T) *List[T] {
+func NewListFromSlice[T comparable](items []T) *List[T] {
 	newItems := make([]T, len(items))
 	copy(newItems, items)
 	return &List[T]{
@@ -121,7 +121,7 @@ func (l *List[T]) InsertRange(index int, items []T) error {
 // Remove removes the first occurrence of a specific object from the List
 func (l *List[T]) Remove(item T) bool {
 	for i, v := range l.items {
-		if any(v) == any(item) {
+		if v == item {
 			l.RemoveAt(i)
 			return true
 		}
@@ -171,7 +171,7 @@ func (l *List[T]) RemoveRange(index, count int) error {
 // Contains determines whether an element is in the List
 func (l *List[T]) Contains(item T) bool {
 	for _, v := range l.items {
-		if any(v) == any(item) {
+		if v == item {
 			return true
 		}
 	}
@@ -181,7 +181,7 @@ func (l *List[T]) Contains(item T) bool {
 // IndexOf searches for the specified object and returns the zero-based index of the first occurrence
 func (l *List[T]) IndexOf(item T) int {
 	for i, v := range l.items {
-		if any(v) == any(item) {
+		if v == item {
 			return i
 		}
 	}
@@ -191,7 +191,7 @@ func (l *List[T]) IndexOf(item T) int {
 // LastIndexOf searches for the specified object and returns the zero-based index of the last occurrence
 func (l *List[T]) LastIndexOf(item T) int {
 	for i := len(l.items) - 1; i >= 0; i-- {
-		if any(l.items[i]) == any(item) {
+		if l.items[i] == item {
 			return i
 		}
 	}

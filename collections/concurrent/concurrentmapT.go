@@ -8,13 +8,13 @@ type ConcurrentMap[TKey comparable, TValue any] struct {
 	dic map[TKey]TValue      // 存储数据的映射
 }
 
-// NewCurrentMap 创建一个新的泛型并发安全映射
+// NewConcurrentMap 创建一个新的泛型并发安全映射
 // 参数:
 //   Tkey: 键的类型，必须是可比较的
 //   TValue: 值的类型
 // 返回值:
 //   *ConcurrentMap[Tkey, TValue]: 新创建的泛型并发安全映射
-func NewCurrentMap[Tkey comparable, TValue any]() *ConcurrentMap[Tkey, TValue] {
+func NewConcurrentMap[Tkey comparable, TValue any]() *ConcurrentMap[Tkey, TValue] {
 	return &ConcurrentMap[Tkey, TValue]{
 		dic: make(map[Tkey]TValue),
 	}
