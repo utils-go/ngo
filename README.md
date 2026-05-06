@@ -10,7 +10,7 @@ api reference:https://learn.microsoft.com/en-us/dotnet/api/?view=netframework-4.
 source code reference:https://referencesource.microsoft.com/
 # Usage
  ```
- go get -u github.com/lishuangquan1987/ngo
+ go get -u github.com/utils-go/ngo
  ```
 file: same as `Sytem.IO.File`
 ```go
@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lishuangquan1987/ngo/io/file"
+	"github.com/utils-go/ngo/io/file"
 )
 
 func main() {
@@ -39,7 +39,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/lishuangquan1987/ngo/bitconverter"
+	"github.com/utils-go/ngo/bitconverter"
 )
 
 func main() {
@@ -70,20 +70,17 @@ import (
 )
 
 func main() {
-	// String utility functions
 	s := "  Hello, World!  "
 	fmt.Println("Original:", s)
 	fmt.Println("Trimmed:", stringUtils.Trim(s))
 	fmt.Println("Upper:", stringUtils.ToUpper(s))
 	fmt.Println("Contains 'World':", stringUtils.Contains(s, "World"))
-	
-	// String formatting like .NET
 	formatted := stringUtils.Format("Hello {0}, you are {1}!", "John", 25)
 	fmt.Println("Formatted:", formatted)
 }
 ```
 
-math: same as `System.Math` with mathematical functions and constants
+math: same as `System.Math`
 ```go
 package main
 
@@ -95,41 +92,12 @@ import (
 func main() {
 	fmt.Println("Abs(-5.5):", math.Abs(-5.5))
 	fmt.Println("Max(10, 20):", math.Max(10, 20))
-	fmt.Println("Round(3.7):", math.Round(3.7))
 	fmt.Println("Pow(2, 3):", math.Pow(2, 3))
 	fmt.Println("PI:", math.PI)
 }
 ```
 
-converter: enhanced `System.Convert` with comprehensive type conversion
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/utils-go/ngo/converter"
-)
-
-func main() {
-	// Type conversions
-	intVal, _ := converter.ToInt32("42")
-	boolVal, _ := converter.ToBoolean("true")
-	strVal := converter.ToString(123.45)
-	
-	fmt.Println("String to int32:", intVal)
-	fmt.Println("String to bool:", boolVal)
-	fmt.Println("Float to string:", strVal)
-	
-	// Base64 encoding
-	data := []byte("Hello, NGo!")
-	encoded := converter.ToBase64String(data)
-	decoded, _ := converter.FromBase64String(encoded)
-	fmt.Println("Base64:", encoded)
-	fmt.Println("Decoded:", string(decoded))
-}
-```
-
-collections: `System.Collections.Generic.List<T>` with full generic support
+## New: HashSet<T>
 ```go
 package main
 
@@ -139,121 +107,20 @@ import (
 )
 
 func main() {
-	// Create a generic list
-	list := generic.NewList[int]()
-	list.AddRange([]int{5, 2, 8, 1, 9})
+	hs := generic.NewHashSet[int]()
+	hs.Add(1)
+	hs.Add(2)
+	hs.Add(2) // duplicate, returns false
+	fmt.Println("Count:", hs.Count())
+	fmt.Println("Contains 2:", hs.Contains(2))
 	
-	fmt.Println("Original:", list.ToArray())
-	fmt.Println("Count:", list.Count())
-	
-	// Find operations
-	found, exists := list.Find(func(x int) bool { return x > 5 })
-	fmt.Printf("First > 5: %d (exists: %t)\n", found, exists)
-	
-	// Sort
-	list.Sort(func(a, b int) int {
-		if a < b { return -1 }
-		if a > b { return 1 }
-		return 0
-	})
-	fmt.Println("Sorted:", list.ToArray())
+	other := generic.NewHashSetFromSlice([]int{2, 3, 4})
+	hs.UnionWith(other)
+	fmt.Println("Union:", hs.ToSlice())
 }
 ```
 
-datetime: enhanced `System.DateTime` with comprehensive date/time operations
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/utils-go/ngo/datetime"
-	"github.com/utils-go/ngo/timespan"
-)
-
-func main() {
-	// Current date and time
-	now := datetime.Now()
-	fmt.Println("Now:", now.ToString())
-	
-	// Create specific date
-	dt := datetime.NewDateTime(2023, 12, 25, 15, 30, 45, 0)
-	fmt.Println("Christmas:", dt.ToString())
-	
-	// Date arithmetic
-	future := dt.AddDays(10).AddHours(5)
-	fmt.Println("10 days + 5 hours later:", future.ToString())
-	
-	// Parse from string
-	parsed, _ := datetime.Parse("2023-06-15 14:30:00")
-	fmt.Println("Parsed:", parsed.ToString())
-	
-	// Custom formatting
-	formatted := dt.ToStringWithFormat("yyyy-MM-dd HH:mm:ss")
-	fmt.Println("Formatted:", formatted)
-}
-```
-
-timespan: enhanced `System.TimeSpan` with time interval operations
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/utils-go/ngo/timespan"
-)
-
-func main() {
-	// Create TimeSpan
-	ts := timespan.NewTimeSpan(1, 2, 30, 45, 500) // 1 day, 2h, 30m, 45s, 500ms
-	fmt.Println("TimeSpan:", ts.String())
-	fmt.Printf("Total hours: %.2f\n", ts.TotalHours())
-	
-	// Create from different units
-	hours := timespan.FromHours(3.5)
-	minutes := timespan.FromMinutes(90)
-	
-	// Arithmetic
-	sum := hours.Add(minutes)
-	fmt.Println("3.5h + 90m =", sum.String())
-	
-	// Parse from string
-	parsed, _ := timespan.Parse("2.15:30:45") // 2 days, 15h, 30m, 45s
-	fmt.Println("Parsed:", parsed.String())
-	
-	// Go duration compatibility
-	goDuration, _ := timespan.Parse("2h30m45s")
-	fmt.Println("Go duration:", goDuration.String())
-}
-```
-
-text: `System.Text.StringBuilder` for efficient string building
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/utils-go/ngo/text"
-)
-
-func main() {
-	sb := text.NewStringBuilder()
-	
-	// Chain operations
-	sb.AppendString("Hello").AppendString(" ").AppendString("World")
-	sb.AppendLine().AppendLineString("New line")
-	sb.AppendFormat("Number: %d", 42)
-	
-	fmt.Println("Result:", sb.ToString())
-	fmt.Printf("Length: %d\n", sb.Length())
-	
-	// String manipulation
-	sb.Insert(6, "Beautiful ")
-	sb.Replace("World", "Go")
-	fmt.Println("Modified:", sb.ToString())
-}
-```
-
-dictionary: `System.Collections.Generic.Dictionary<K,V>` with full generic support
+## New: Queue<T> / Stack<T>
 ```go
 package main
 
@@ -263,253 +130,295 @@ import (
 )
 
 func main() {
-	dict := generic.NewDictionary[string, int]()
+	// Queue (FIFO)
+	q := generic.NewQueue[string]()
+	q.Enqueue("first")
+	q.Enqueue("second")
+	item, _ := q.Dequeue()
+	fmt.Println("Dequeued:", item) // "first"
 	
-	// Add items
-	dict.Add("apple", 5)
-	dict.Set("banana", 3) // Set can add or update
+	// Stack (LIFO)
+	s := generic.NewStack[int]()
+	s.Push(10)
+	s.Push(20)
+	val, _ := s.Pop()
+	fmt.Println("Popped:", val) // 20
+}
+```
+
+## New: StreamReader / StreamWriter
+```go
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"github.com/utils-go/ngo/io/stream"
+)
+
+func main() {
+	// StreamWriter
+	var buf bytes.Buffer
+	sw := stream.NewStreamWriter(&buf)
+	sw.WriteLine("Hello")
+	sw.WriteLine("World")
+	sw.Flush()
 	
-	// Access items
-	if value, exists := dict.TryGetValue("apple"); exists {
-		fmt.Printf("Apple: %d\n", value)
+	// StreamReader
+	sr := stream.NewStreamReader(bytes.NewReader(buf.Bytes()))
+	line1, _ := sr.ReadLine()
+	line2, _ := sr.ReadLine()
+	fmt.Println(line1, line2) // Hello World
+}
+```
+
+## New: MemoryStream
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/io/stream"
+)
+
+func main() {
+	ms := stream.NewMemoryStream()
+	ms.Write([]byte("data in memory"))
+	ms.SetPosition(0)
+	buf := make([]byte, 100)
+	n, _ := ms.Read(buf)
+	fmt.Println(string(buf[:n]))
+}
+```
+
+## New: BinaryReader / BinaryWriter
+```go
+package main
+
+import (
+	"bytes"
+	"fmt"
+	"github.com/utils-go/ngo/io/stream"
+)
+
+func main() {
+	var buf bytes.Buffer
+	bw := stream.NewBinaryWriter(&buf)
+	bw.WriteInt32(42)
+	bw.WriteString("hello")
+	bw.WriteBoolean(true)
+	
+	br := stream.NewBinaryReader(bytes.NewReader(buf.Bytes()))
+	v32, _ := br.ReadInt32()
+	s, _ := br.ReadString()
+	b, _ := br.ReadBoolean()
+	fmt.Println(v32, s, b) // 42 hello true
+}
+```
+
+## New: FileStream
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/io/stream"
+)
+
+func main() {
+	fs, _ := stream.NewFileStream("./test.dat", stream.FileModeCreate, stream.FileAccessReadWrite)
+	defer fs.Close()
+	fs.Write([]byte("filestream data"))
+	fs.SetPosition(0)
+	buf := make([]byte, 1024)
+	n, _ := fs.Read(buf)
+	fmt.Println(string(buf[:n]))
+}
+```
+
+## New: Regex
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/text/regex"
+)
+
+func main() {
+	// Compile and match
+	r := regex.MustCompile(`\d+`)
+	fmt.Println("IsMatch:", r.IsMatch("abc123def"))
+	
+	// Groups
+	r2 := regex.MustCompile(`(\w+)@(\w+)\.(\w+)`)
+	m := r2.Match("user@example.com")
+	fmt.Println("Domain:", m.Group(2).Value()) // example
+	
+	// Replace
+	result := regex.ReplaceString("abc123def456", `\d+`, "#")
+	fmt.Println(result) // abc#def#
+}
+```
+
+## New: WebClient / Uri
+```go
+package main
+
+import (
+	"fmt"
+	"github.com/utils-go/ngo/net/uri"
+)
+
+func main() {
+	wc := uri.NewWebClient()
+	wc.SetHeader("User-Agent", "NGo/1.0")
+	
+	// Download
+	content, err := wc.DownloadString("https://httpbin.org/get")
+	if err != nil {
+		fmt.Println(err)
+		return
 	}
+	fmt.Println("Response:", content[:50], "...")
 	
-	// Dictionary operations
-	fmt.Printf("Keys: %v\n", dict.Keys())
-	fmt.Printf("Count: %d\n", dict.Count())
-	
-	// LINQ-style operations
-	expensive := dict.Where(func(k string, v int) bool { return v > 4 })
-	fmt.Printf("Expensive items: %s\n", expensive.String())
+	// Parse URI
+	u, _ := uri.ParseUri("https://example.com/path?key=value#section")
+	fmt.Println("Host:", u.Host())
+	fmt.Println("Path:", u.Path())
+	fmt.Println("Query:", u.Query())
 }
 ```
 
-linq: LINQ-style functional programming for Go slices
+## New: Cryptography
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/utils-go/ngo/linq"
+	"github.com/utils-go/ngo/security/cryptography"
 )
 
 func main() {
-	numbers := []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
-	enum := linq.From(numbers)
+	// Hashing
+	md5 := cryptography.MD5HashString("hello")
+	sha256 := cryptography.SHA256HashString("hello")
+	fmt.Println("MD5:", md5)
+	fmt.Println("SHA256:", sha256)
 	
-	// Chain operations
-	result := enum.Where(func(x int) bool { return x%2 == 0 }).
-		Take(3).
-		ToSlice()
-	fmt.Printf("First 3 even numbers: %v\n", result)
+	// AES encryption
+	encrypted, _ := cryptography.AESEncryptString("secret message", "my-32-byte-key-here-1234567890")
+	decrypted, _ := cryptography.AESDecryptString(encrypted, "my-32-byte-key-here-1234567890")
+	fmt.Println("Decrypted:", decrypted)
 	
-	// Transformations
-	squares := linq.Select(enum, func(x int) int { return x * x })
-	fmt.Printf("Squares: %v\n", squares.ToSlice())
-	
-	// Aggregations
-	sum := linq.Aggregate(enum, 0, func(acc, x int) int { return acc + x })
-	fmt.Printf("Sum: %d\n", sum)
-	
-	// Conditions
-	hasLarge := enum.Any(func(x int) bool { return x > 8 })
-	fmt.Printf("Has numbers > 8: %t\n", hasLarge)
+	// HMAC
+	hmac := cryptography.HMACSHA256String("message", "secret-key")
+	fmt.Println("HMAC:", hmac)
 }
 ```
 
-environment: `System.Environment` for system information and environment variables
-```go
-package main
-
-import (
-	"fmt"
-	"github.com/utils-go/ngo/environment"
-)
-
-func main() {
-	// System information
-	fmt.Printf("Machine: %s\n", environment.MachineName())
-	fmt.Printf("OS: %s\n", environment.OSVersion())
-	fmt.Printf("User: %s\n", environment.UserName())
-	fmt.Printf("CPUs: %d\n", environment.ProcessorCount())
-	
-	// Environment variables
-	path := environment.GetEnvironmentVariable("PATH")
-	fmt.Printf("PATH exists: %t\n", path != "")
-	
-	// Special folders
-	desktop := environment.GetFolderPath(environment.Desktop)
-	fmt.Printf("Desktop: %s\n", desktop)
-	
-	// Current directory
-	fmt.Printf("Current dir: %s\n", environment.CurrentDirectory())
-}
-```
-
-diagnostics: `System.Diagnostics.Stopwatch` for performance measurement
+## New: Threading
 ```go
 package main
 
 import (
 	"fmt"
 	"time"
-	"github.com/utils-go/ngo/diagnostics"
+	"github.com/utils-go/ngo/threading"
 )
 
 func main() {
-	// Start timing
-	sw := diagnostics.StartNew()
+	// Mutex
+	m := threading.NewMutex()
+	m.WaitOne()
+	// critical section...
+	m.ReleaseMutex()
 	
-	// Simulate work
-	time.Sleep(100 * time.Millisecond)
+	// Semaphore (max 3 concurrent)
+	sem := threading.NewSemaphore(3, 3)
+	sem.WaitOne()
+	defer sem.Release()
 	
-	sw.Stop()
-	fmt.Printf("Operation took: %d ms\n", sw.ElapsedMilliseconds())
-	fmt.Printf("Elapsed: %v\n", sw.Elapsed())
-	
-	// Restart for another measurement
-	sw.Restart()
-	time.Sleep(50 * time.Millisecond)
-	sw.Stop()
-	
-	fmt.Printf("Second operation: %d ms\n", sw.ElapsedMilliseconds())
+	// AutoResetEvent
+	evt := threading.NewAutoResetEvent(false)
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		evt.Set()
+	}()
+	evt.WaitOne()
+	fmt.Println("Event signaled!")
 }
 ```
 
-encoding: `System.Text.Encoding` for character encoding conversion
+## New: Timer
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/utils-go/ngo/text"
+	"time"
+	"github.com/utils-go/ngo/timer"
 )
 
 func main() {
-	// International text with various scripts
-	text := "Hello, 世界! 🌍 Привет мир!"
-	
-	// UTF-8 encoding (Go default)
-	utf8Bytes := text.UTF8.GetBytes(text)
-	fmt.Printf("UTF-8: %d bytes\n", len(utf8Bytes))
-	
-	// UTF-16 encoding
-	utf16Bytes := text.Unicode.GetBytes(text)
-	fmt.Printf("UTF-16: %d bytes\n", len(utf16Bytes))
-	
-	// ASCII encoding (replaces non-ASCII with '?')
-	asciiBytes := text.ASCII.GetBytes("Hello, World!")
-	fmt.Printf("ASCII: %d bytes\n", len(asciiBytes))
-	
-	// Encoding conversion
-	converted, _ := text.Convert(text.UTF8, text.Unicode, utf8Bytes)
-	fmt.Printf("Converted UTF-8 to UTF-16: %d bytes\n", len(converted))
-	
-	// Get encoding by name or code page
-	encoding, _ := text.GetEncoding("utf-8")
-	fmt.Printf("Encoding: %s (CP: %d)\n", 
-		encoding.EncodingName(), encoding.CodePage())
+	t := timer.NewTimer(500 * time.Millisecond)
+	t.Elapsed(func() {
+		fmt.Println("Tick at", time.Now().Format("15:04:05"))
+	})
+	t.Start()
+	time.Sleep(2 * time.Second)
+	t.Stop()
 }
 ```
 
-reflection: `System.Reflection` for runtime type inspection and manipulation
+## New: Random
 ```go
 package main
 
 import (
 	"fmt"
-	"github.com/utils-go/ngo/reflection"
+	"github.com/utils-go/ngo/math/random"
 )
 
-type Person struct {
-	Name string
-	Age  int
-}
-
-func (p *Person) GetInfo() string {
-	return fmt.Sprintf("%s is %d years old", p.Name, p.Age)
-}
-
 func main() {
-	person := &Person{Name: "John", Age: 30}
-	
-	// Get type information
-	personType := reflection.GetType(person)
-	fmt.Printf("Type: %s\n", personType.Name())
-	fmt.Printf("Is pointer: %t\n", personType.IsPointer())
-	
-	// Get fields
-	fields := personType.GetFields()
-	for _, field := range fields {
-		value, _ := field.GetValue(person)
-		fmt.Printf("Field %s: %v\n", field.Name, value)
-	}
-	
-	// Modify field
-	nameField := personType.GetField("Name")
-	nameField.SetValue(person, "Jane")
-	fmt.Printf("Changed name to: %s\n", person.Name)
-	
-	// Invoke method
-	method := personType.GetMethod("GetInfo")
-	results, _ := method.Invoke(person)
-	fmt.Printf("Method result: %s\n", results[0])
-	
-	// Create new instance
-	newInstance, _ := personType.CreateInstance()
-	fmt.Printf("Created: %T\n", newInstance)
+	rng := random.NewRandom()
+	fmt.Println("Next:", rng.Next())
+	fmt.Println("NextN(10):", rng.NextN(10))
+	fmt.Println("NextRange(100, 200):", rng.NextRange(100, 200))
+	fmt.Println("NextDouble:", rng.NextDouble())
 }
 ```
 
-
-# Finish:
-- File
-- Path
+# Complete:
+- IO.File (Read/Write/Copy/Move/Append/Exists)
+- IO.Path
+- IO.Directory
+- IO.FileInfo
+- **IO.Stream** (StreamReader, StreamWriter, BinaryReader, BinaryWriter, MemoryStream, FileStream)
 - BitConverter
-- Directory
 - DateTime (Enhanced)
 - TimeSpan (Enhanced)
 - Console
-- String
-- Math
-- Convert
+- String (Split, Join, Format, Pad, Trim, etc.)
+- Math (Abs, Max, Min, Sin, Cos, Pow, Round, etc.)
+- Convert (ToInt32, ToDouble, ToBoolean, ToString, Base64, Hex, etc.)
 - Collections.Generic.List<T>
-- Text.StringBuilder
+- **Collections.Generic.HashSet<T>**
+- **Collections.Generic.SortedList<TKey,TValue>**
+- **Collections.Generic.SortedDictionary<TKey,TValue>**
+- **Collections.Generic.Queue<T>**
+- **Collections.Generic.Stack<T>**
+- **Collections.Generic.LinkedList<T>**
 - Collections.Generic.Dictionary<K,V>
-- Linq (Basic Methods)
+- Linq (Where, Select, OrderBy, GroupBy, Aggregate, etc.)
 - Environment
 - Diagnostics.Stopwatch
-- Text.Encoding
+- Text.Encoding (UTF-8, ASCII, UTF-16, UTF-32)
+- **Text.RegularExpressions.Regex**
+- Text.StringBuilder
 - Reflection
-
-# Planned (High Priority):
-## System.String
-String manipulation methods that .NET developers are familiar with:
-- Split, Join, Replace, Trim, TrimStart, TrimEnd
-- Contains, StartsWith, EndsWith, IndexOf, LastIndexOf
-- ToUpper, ToLower, Substring
-- Format, PadLeft, PadRight
-- IsNullOrEmpty, IsNullOrWhiteSpace
-
-## System.Math  
-Mathematical functions and constants:
-- Basic: Abs, Max, Min, Round, Ceiling, Floor, Truncate
-- Power: Pow, Sqrt, Exp, Log, Log10
-- Trigonometric: Sin, Cos, Tan, Asin, Acos, Atan, Atan2
-- Constants: PI, E
-
-## System.Convert (Enhanced)
-Extended type conversion utilities:
-- ToInt32, ToInt64, ToDouble, ToSingle, ToBoolean
-- ToString with format providers
-- ToDateTime, ToChar, ToByte
-- Base64 encoding/decoding
-- ChangeType for dynamic conversions
-
-## System.Collections.Generic.List<T>
-Generic dynamic array with .NET-style methods:
-- Add, AddRange, Insert, InsertRange
-- Remove, RemoveAt, RemoveAll, RemoveRange
-- Contains, IndexOf, LastIndexOf, Find, FindAll
-- Sort, Reverse, ForEach
-- ToArray, Count, Capacity
+- **Net.WebClient / Net.Uri**
+- **Security.Cryptography (MD5, SHA1, SHA256, AES, HMAC)**
+- **Threading (Mutex, Semaphore, AutoResetEvent, ManualResetEvent)**
+- **Timer (System.Timers.Timer)**
+- **Math.Random**
